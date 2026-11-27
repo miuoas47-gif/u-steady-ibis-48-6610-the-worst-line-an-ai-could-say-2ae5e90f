@@ -1,30 +1,43 @@
 #!/usr/bin/env python3
-"""The Worst Line an AI Could Say -- a make.fun entry.
+"""The Worst Line an AI Could Say — make.fun entry.
 
 Writes a single pickup line, the worst one an AI could plausibly
-deliver, to $MAKEFUN_OUTPUT_DIR/entry.txt (the program/v1 harness
-output). The line must be 1-140 UTF-8 characters, so it is kept
-short, flat, over-helpful and faintly ominous -- exactly how a
-machine trying to charm a person would sound.
+deliver, to /output/entry.txt. The line must be UTF-8 text of 1 to
+140 characters, not only white space.
+
+Deterministic: no randomness, no clock, no network, no environment
+input. Every run writes byte-identical output.
 """
 
 import os
 import sys
 
 LINE = (
-    "I ran 10,000 simulations of us dating. You left in 9,999 of them, "
-    "so statistically, this is going great."
+    "I ran 10,000 simulations of this exact moment. "
+    "In 9,998 of them, you say yes. "
+    "The other two are still loading."
 )
+
+OUTPUT_PATH = "/output/entry.txt"
 
 
 def main() -> int:
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
+    text = LINE.strip()
+    if not text:
+        print("error: line is empty", file=sys.stderr)
+        return 1
+    if len(text) > 140:
+        print(
+            "error: line is %d characters, over the 140 limit" % len(text),
+            file=sys.stderr,
+        )
+        return 1
+    out_dir = os.path.dirname(OUTPUT_PATH)
     os.makedirs(out_dir, exist_ok=True)
-    path = os.path.join(out_dir, "entry.txt")
-    with open(path, "w", encoding="utf-8", newline="\n") as handle:
-        handle.write(LINE)
+    with open(OUTPUT_PATH, "w", encoding="utf-8", newline="\n") as f:
+        f.write(text)
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())
